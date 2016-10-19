@@ -1,0 +1,25 @@
+{
+  "name": "ng-pdfviewer",
+  "main": "ng-pdfviewer.js",
+  "homepage": "https://github.com/juliender/ng-pdfviewer",
+  "authors": [
+    "Julien Derenty <julien@boxmyjob.com>"
+  ],
+  "description": "Similar to angularjs-pdf but it can render all pages at a time",
+  "keywords": [
+    "pdfjs",
+    "angular"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#^1.5.8",
+    "pdfjs-dist": "^1.6.258"
+  }
+}
