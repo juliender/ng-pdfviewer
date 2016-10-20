@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$log', '$q', function($log, $q) {
+directive('pdfviewer', [ '$log', '$q', '$timeout', function($log, $q, $timeout) {
 	var _pageToShow = 1;
 	var canvas = [];
 	var instance_id = null;
@@ -91,8 +91,17 @@ directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 					return;
 				}
 				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
-					var ctx = canvas.getContext('2d');
+
+					if($scope.scale == 'page-width'){
+						var defaultViewport = page.getViewport(1.0);
+						var ctx = canvas.getContext('2d');
+
+						var pageWidthScale = $scope.containerWidth / defaultViewport.width;
+						var viewport = page.getViewport(pageWidthScale);
+					}else{
+						var viewport = page.getViewport($scope.scale);
+					}
+
 
 					canvas.height = viewport.height;
 					canvas.width = viewport.width;
@@ -104,7 +113,7 @@ directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 								callback(true);
 							}
 							$scope.$apply(function() {
-								$scope.onPageLoad({ page: $scope.pageNum, total: $scope.pdfDoc.numPages });
+								$scope.onPageLoad({ page: num, total: $scope.pdfDoc.numPages })
 							});
 						},
 						function() {
@@ -163,6 +172,27 @@ directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 
 			instance_id = iAttr.id;
 
+			var setContainerSize = function() {
+				scope.containerWidth = iElement.parent()[0].offsetWidth - 45;
+				scope.containerHeight = iElement.parent()[0].clientHeight;
+				$log.debug('setContainerSize ' + scope.containerWidth)
+			}
+
+			$timeout(setContainerSize).then(function(){
+				var resizePromise;
+				window.onresize = function(){
+					if (resizePromise) {
+						$timeout.cancel(resizePromise);
+					}
+					resizePromise = $timeout(function() {
+						setContainerSize();
+						scope.renderDocument();
+					}, 100);
+				};
+			});
+
+
+
 			createCanvas = function(iElement, count){
 				canvas = iElement.find('canvas');
 				
@@ -201,7 +231,7 @@ directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 			iAttr.$observe('pagesToShow', function(v) {
 				//SKIP if rendering is in progress or document not loaded
 				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v))) {
-					scope.pagesToShow = _pageToShow;
+					// scope.pagesToShow = _pageToShow;
 					return;
 				}
 				
