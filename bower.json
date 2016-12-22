@@ -20,6 +20,6 @@
   ],
   "dependencies": {
     "angular": "angularjs#^1.5.8",
-    "pdfjs-dist": "^1.6.263"
+    "pdfjs-dist": "^1.6.414"
   }
 }
